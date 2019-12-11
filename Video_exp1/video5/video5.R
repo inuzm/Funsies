@@ -56,7 +56,7 @@ for(k in 1:nimages){
 
     # Define a new function that mixes the simple and complex levels
     mixture <- function(alpha){
-        return(function(x, y){ sqrt(alpha) * chale(x, y) + (1 - sqrt(alpha)) * chale_simple(x, y) })
+        return(function(x, y){ alpha^2 * chale(x, y) + (1 - alpha^2) * chale_simple(x, y) })
     }
 
     # %0nd ensures the file to have n leading zeroes (n should be the digits of the maximum number of iterations)
@@ -67,7 +67,7 @@ for(k in 1:nimages){
 
     png(paste0(output_directory, sprintf("/%04d_col.png", k)), width = 600, height = 600, res = 75)
     par(mar = c(0,0,0,0) + 0.1)
-    image(x = y, y = y, z = outer(x, y, mixture(convex)), col = wes_palette("Darjeeling1", n = 50, type = "continuous"))
+    image(x = y, y = y, z = outer(x, y, mixture(convex)), col = wes_palette("FantasticFox1", n = 50, type = "continuous"))
     dev.off()
 
     # Comment whichever is not needed (I'm commenting the exponents variation to modify the absolute value)
