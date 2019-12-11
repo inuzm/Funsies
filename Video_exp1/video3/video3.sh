@@ -4,7 +4,7 @@ mkdir ./images
 
 # First argument is directory where images will be saved
 
-Rscript --vanilla ./video3.R ./images 60 30
+Rscript --vanilla ./video3.R ./images 30 15
 
 cd ./images
 
