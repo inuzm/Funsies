@@ -95,7 +95,7 @@ for(k in 1:nimages){
     c11 <- c11 + rnorm(n = 1, sd = sqrt(1e-3))
     c12 <- c12 + rnorm(n = 1, sd = sqrt(1e-3))
 
-    if(convex / convex_max < 1){
+    if(convex < 1){
         convex <- min(convex + 1 / (convex_max * nimages), 1)
     }
 
