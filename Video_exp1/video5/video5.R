@@ -56,7 +56,7 @@ for(k in 1:nimages){
 
     # Define a new function that mixes the simple and complex levels
     mixture <- function(alpha){
-        return(function(x, y){ alpha * chale(x, y) + (1 - alpha) * chale_simple(x, y) })
+        return(function(x, y){ sqrt(alpha) * chale(x, y) + (1 - sqrt(alpha)) * chale_simple(x, y) })
     }
 
     # %0nd ensures the file to have n leading zeroes (n should be the digits of the maximum number of iterations)
