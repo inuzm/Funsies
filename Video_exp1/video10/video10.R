@@ -1,0 +1,180 @@
+#!/usr/bin/env Rscript
+
+args <- commandArgs(trailingOnly = TRUE)
+
+# First argument should be the directory where images will be saved
+# Second argument is the length of the video
+# Third argument is the framerate of the video
+
+output_directory <- args[1]
+nimages <- as.numeric(args[2]) * as.numeric(args[3])
+
+cat(sprintf("The number of frames is:%4d.\n", nimages))
+
+# Tons of constants (play with them)
+e1 <- 0.7; e2 <- 0.7; e3 <- 0.7; e4 <- 0.7; e5 <- 0.7; e6 <- 0.7; e7 <- 0.7; e8 <- 0.7; e9 <- 0.7; e10 <- 0.7; e11 <- 0.7; e12 <- 0.7; e13 <- 0.7; e14 <- 0.7; e15 <- 0.7
+d1 <- -pi/10; d2 <- 0.1; d3 <- 0.3; d4 <- -0.17; d5 <- 0.21; d6 <- -exp(-2); d7 <- 0.5; d8 <- -0.74; d9 <- 0.3; d10 <- 0.21; d11 <- -0.2; d12 <- 0.3; d13 <- 0.1; d14 <- -exp(1)/10; d15 <- -0.3
+c1 <- 1; c2 <- -1; c3 <- 1; c4 <- -1; c5 <- 1; c6 <- -1; c7 <- 1; c8 <- -1; c9 <- 1; c10 <- -1; c11 <- 1; c12 <- -1; c13 <- 1; c14 <- -1; c15 <- 1
+
+# Function that produces level sets (play with it)
+# Absolute values are used as R doesn't know what to do with things like (-3)^(1.7)
+# Absolute values are not needed if the exponents remain constant and integer valued
+chale1 <- function(x, y){
+    (
+        c1 * dnorm(2 * x + y, mean = d1, sd = e1) + 
+        c2 * dnorm(x - 2 * y, mean = d2, sd = e2) + 
+        c3 * dnorm(((x * y) %%  1.17) * sign(x * y), mean = d3, sd = e3)
+    )
+}
+
+chale2 <- function(x, y){
+    (
+        c4 * dnorm(-x + y, mean = d4, sd = e4) + 
+        c5 * dnorm(x^2 + y^2, mean = d5, sd = e5) + 
+        c6 * dnorm(x^2 - y^2, mean = d6, sd = e6)
+    )
+}
+
+chale3 <- function(x, y){
+    (
+        c7 * dnorm(x^2 * y^2, mean = d7, sd = e8) + 
+        c8 * dnorm(-x^2 + y^2, mean = d8, sd = e9) + 
+        c9 * dnorm(x^3 + y^3, mean = d9, sd = e9)
+    )
+}
+
+chale4 <- function(x, y){
+    (
+        c10 * dnorm(x^3 - y^3, mean = d10, sd = e10) + 
+        c11 * dnorm(x^3 * y^3, mean = d11, sd = e11) + 
+        c12 * dnorm(-x^3 + y^3, mean = d12, sd = e12)
+    )
+}
+
+chale5 <- function(x, y){
+    (
+        c13 * dnorm(sinpi(x) + cospi(y), mean = d13, sd = e13) + 
+        c14 * dnorm(cospi(x) - sinpi(y), mean = d14, sd = e14) + 
+        c15 * dnorm(sinpi(x + y) - cospi(x - y), mean = d15, sd = e15)
+    )
+}
+
+# Simple function
+
+chale_simple <- function(x, y){
+    2 * (x^2 + y^2) - 3 * (x + y) + x * y
+}
+
+# x-y values to be used in a grid where chale will be evaluated
+x <- seq(from = -3, to = 3, length = 300)
+y <- seq(from = -3, to = 3, length = 300)
+
+# useful packages for colors (to play with)
+require(ghibli, quietly = TRUE)
+require(wesanderson, quietly = TRUE)
+require(colorRamps, quietly = TRUE)
+require(colorspace, quietly = TRUE)
+require(viridis, quietly = TRUE)
+require(rcartocolor, quietly = TRUE)
+require(scico, quietly = TRUE)
+
+# Mixture variable
+convex <- 0
+convex_max <- 0.5
+
+# This loop does it all
+# Print the contour set and the level set (as image) as png-files of 800 × 800 with 100 ppi resolution
+# Then we modify the constants (ensuring the exponents to be greater than one which I think is useless right now)
+# Print which iteration has been done
+cat('Progress:\n')
+pb <- txtProgressBar(max = nimages, style = 3)
+for(k in 1:nimages){
+
+    # Define a new function that mixes the simple and complex levels
+    mixture <- function(alpha){
+        return(function(x, y){
+            if(alpha <= 0.2){
+                return( (1 - (5*alpha)^(1/3)) * chale_simple(x, y) + (5 * alpha)^(1/3) * chale1(x,y) )
+            } else if (alpha <= 0.4) {
+               return( (5 * alpha - 1) * chale2(x, y) + (2 - 5 * alpha) * chale1(x, y) )
+            } else if (alpha <= 0.6) {
+               return( (5 * alpha - 2) * chale3(x, y) + (3 - 5 * alpha) * chale2(x, y) )
+            } else if (alpha <= 0.8) {
+               return( (5 * alpha - 3) * chale4(x, y) + (4 - 5 * alpha) * chale3(x, y) )
+            } else {
+                return( (5 * alpha - 4) * chale5(x, y) + (5 - 5 * alpha) * chale4(x, y) )
+            }
+        })
+    }
+
+    # %0nd ensures the file to have n leading zeroes (n should be the digits of the maximum number of iterations)
+    png(paste0(output_directory, sprintf("/%04d_bw.png", k)), width = 600, height = 600, res = 75)
+    par(mar = c(0,0,0,0) + 0.1)
+    contour(x = x, y = y, z = outer(x, y, mixture(convex)), drawlabels = FALSE, col = "black", nlevels = 15)
+    dev.off()
+
+    png(paste0(output_directory, sprintf("/%04d_col.png", k)), width = 600, height = 600, res = 75)
+    par(mar = c(0,0,0,0) + 0.1)
+    image(x = y, y = y, z = outer(x, y, mixture(convex)), col = scico(n = 50, palette = "oleron"))
+    dev.off()
+
+    # Comment whichever is not needed (I'm commenting the exponents variation to modify the absolute value)
+    # The modification is done via steps distributed as gaussian random variables with variance 1e-3 (as the
+    # value goes higher the difference between iterations will increase, probably 1e-3 is ok, depending
+    # on the number of frames per second and whatever)
+    e1 <- max(e1 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    e2 <- max(e2 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    e3 <- max(e3 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    e4 <- max(e4 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    e5 <- max(e5 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    e6 <- max(e6 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    e7 <- max(e7 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    e8 <- max(e8 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    e9 <- max(e9 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    e10 <- max(e10 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    e11 <- max(e11 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    e12 <- max(e12 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    e13 <- max(e13 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    e14 <- max(e14 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    e15 <- max(e15 + rnorm(n = 1, sd = sqrt(1e-3)), 1e-6)
+    c1 <- c1 + rnorm(n = 1, sd = sqrt(1e-3))
+    c2 <- c2 + rnorm(n = 1, sd = sqrt(1e-3))
+    c3 <- c3 + rnorm(n = 1, sd = sqrt(1e-3))
+    c4 <- c4 + rnorm(n = 1, sd = sqrt(1e-3))
+    c5 <- c5 + rnorm(n = 1, sd = sqrt(1e-3))
+    c6 <- c6 + rnorm(n = 1, sd = sqrt(1e-3))
+    c7 <- c7 + rnorm(n = 1, sd = sqrt(1e-3))
+    c8 <- c8 + rnorm(n = 1, sd = sqrt(1e-3))
+    c9 <- c9 + rnorm(n = 1, sd = sqrt(1e-3))
+    c10 <- c10 + rnorm(n = 1, sd = sqrt(1e-3))
+    c11 <- c11 + rnorm(n = 1, sd = sqrt(1e-3))
+    c12 <- c12 + rnorm(n = 1, sd = sqrt(1e-3))
+    c13 <- c13 + rnorm(n = 1, sd = sqrt(1e-3))
+    c14 <- c14 + rnorm(n = 1, sd = sqrt(1e-3))
+    c15 <- c15 + rnorm(n = 1, sd = sqrt(1e-3))
+    d1 <- d1 + rnorm(n = 1, sd = sqrt(1e-3))
+    d2 <- d2 + rnorm(n = 1, sd = sqrt(1e-3))
+    d3 <- d3 + rnorm(n = 1, sd = sqrt(1e-3))
+    d4 <- d4 + rnorm(n = 1, sd = sqrt(1e-3))
+    d5 <- d5 + rnorm(n = 1, sd = sqrt(1e-3))
+    d6 <- d6 + rnorm(n = 1, sd = sqrt(1e-3))
+    d7 <- d7 + rnorm(n = 1, sd = sqrt(1e-3))
+    d8 <- d8 + rnorm(n = 1, sd = sqrt(1e-3))
+    d9 <- d9 + rnorm(n = 1, sd = sqrt(1e-3))
+    d10 <- d10 + rnorm(n = 1, sd = sqrt(1e-3))
+    d11 <- d11 + rnorm(n = 1, sd = sqrt(1e-3))
+    d12 <- d12 + rnorm(n = 1, sd = sqrt(1e-3))
+    d13 <- d13 + rnorm(n = 1, sd = sqrt(1e-3))
+    d14 <- d14 + rnorm(n = 1, sd = sqrt(1e-3))
+    d15 <- d15 + rnorm(n = 1, sd = sqrt(1e-3))
+
+    if(convex < 1){
+        convex <- min(convex + 1 / nimages, 1)
+    }
+
+    setTxtProgressBar(
+        pb,
+        k
+    )
+}
+close(pb)
