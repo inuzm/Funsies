@@ -62,7 +62,7 @@ dev.off()
 
 # vamos a combinar a las criaturas
 
-png("~/Downloads/gris.png", width = 1600, height = 1600, res = 200)
+png("~/Downloads/combinado.png", width = 1600, height = 1600, res = 200)
 plot.new()
 par(mar = c(0,0,0,0)+0.1)
 plot.window(xlim = c(xmin, xmax), ylim = c(ymin, ymax))
