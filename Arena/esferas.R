@@ -88,7 +88,7 @@ dev.off()
 # Ejemplo para genera una colección de "pinturas de arena" sobre la esfera. Jugar al gusto
 
 paleta2 <- rcartocolor::carto_pal(9, "Bold")
-png("~/Documents/whatevs/graphs/experimentos/177.png", width = 2000, height = 2000, pointsize = 6)
+png("path_to_file/collection.png", width = 2000, height = 2000, pointsize = 6)
 par(mar = c(0,0,0,0)+0.1, bg = "aliceblue", mfrow = c(3,3))
 for(i in 1:9){
     sand_sphere(n = 10, N = 1e4, paleta = paleta2[i], alpha = 0.01, noise = 3e-6)
