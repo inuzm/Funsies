@@ -30,7 +30,7 @@ sand_disk <- function(n, N, noise = 1e-6, radius = 1, paleta = "black", alpha = 
 
 png("path_to_file/holi.png", width = 2000, height = 2000, pointsize = 6)
 par(mar = c(0,0,0,0)+0.1, bg = "transparent")
-desert_circles(n = 10, N = 1e4, paleta = "floralwhite", alpha = 0.01, noise = 1e-6)
+sand_disk(n = 10, N = 1e4, paleta = "floralwhite", alpha = 0.01, noise = 1e-6)
 dev.off()
 
 # Ejemplo 2
@@ -39,6 +39,6 @@ paleta2 <- rcartocolor::carto_pal(9, "Prism")
 png("path_to_file/jojojo.png", width = 2000, height = 2000, pointsize = 6)
 par(mar = c(0,0,0,0)+0.1, bg = "aliceblue", mfrow = c(3,3))
 for(i in 1:9){
-    desert_circles(n = 10, N = 1e4, paleta = paleta2[i], alpha = 0.01, noise = 1e-6)
+    sand_disk(n = 10, N = 1e4, paleta = paleta2[i], alpha = 0.01, noise = 1e-6)
 }
 dev.off()
